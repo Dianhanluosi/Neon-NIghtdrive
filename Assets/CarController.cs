@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
+    Rigidbody car;
+
     bool clutchin;
+    bool engine = false;
 
     float gear = 0f;
     float lastgear = 0f;
@@ -18,19 +21,39 @@ public class CarController : MonoBehaviour
     float torque = 450f;
 
     float inspeed = 0f;
+    float inspeed2 = 0f;
     float speed = 0f;
     float acceleration = 0f;
-    float drag = -1f;
+    float drag = -0.2f;
     float hspr = 2000f;
+
+    AudioClip m_StartEngine;
    
     // Start is called before the first frame update
     void Start()
     {
+        //car = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        inspeed = 0f;
+        speed = 0f;
+        acceleration = 0f;
+       // drag = -0.2f;
+
+        //start engine
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+          engine = ! engine;
+        }
+        //engine stall
+        else if (gear != 0 && rpm == 0 && !clutchin )
+        {
+            engine = false;
+        }
+
         //detect whether the clutch is in or not
         if (Input.GetKeyUp(KeyCode.Q))
         {
@@ -58,13 +81,13 @@ public class CarController : MonoBehaviour
             {
                 //so the sync system would work
                 lastgear = gear-2f;
-                if (lastgear <= -1f)
+                if (lastgear <= 0f)
                 {
-                    lastgear = -1f;
+                    lastgear = 0f;
                 }
                 gear -= 1f;
                 //downshift rpm rise
-                if (gear != 0f && gear != -1f)
+                if (gear != 0f)
                 {
                     if (rpm != 0f)
                     {
@@ -72,7 +95,7 @@ public class CarController : MonoBehaviour
                     }
                 }
                 //setting lowest gear, can only down shift back to -1 when rpm is 0
-                if (rpm != 0f)
+               /* if (rpm != 0f)
                 {
                     if (gear == -1f)
                     {
@@ -84,7 +107,7 @@ public class CarController : MonoBehaviour
                     {
                         gear = -1f;
                     }
-                }
+                }*/
 
 
             }
@@ -125,9 +148,9 @@ public class CarController : MonoBehaviour
         }
        
         //setting up lowest and highest gear
-        if (gear <= -1f)
+        if (gear <= 0f)
         {
-            gear = -1f;
+            gear = 0f;
         }
         if (gear >= 6f)
         {
@@ -135,43 +158,38 @@ public class CarController : MonoBehaviour
         }
 
         //press W to increase rpm
-        if (Input.GetKey(KeyCode.W))
-        {
-            if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
-            {
-                rpm += (torque / (gear*gearratio));
-            }
-
-            if (gear == -1f)
-            {
-                rpm += (torque / (2f * gearratio));
-            }
-
-            if (gear == 0f)
-            {
-                rpm += (torque / (gearratio));
-            }
-           
-        }
         //release W to drop rpm
-        if (Input.GetKey(KeyCode.W)==false)
+        if (engine == true)
         {
-            if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
+            if (Input.GetKey(KeyCode.W))
             {
-                rpm -= (torque / (gear*downgearratio));
+                if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
+                {
+                    rpm += (torque / (gear * gearratio));
+                }
+
+                if (gear == 0f)
+                {
+                    rpm += (torque / (gearratio));
+                }
+
             }
 
-            if (gear == -1f)
+            if (Input.GetKey(KeyCode.W) == false)
             {
-                rpm -= (torque / (2*downgearratio));
-            }
+                if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
+                {
+                    rpm -= (torque / (gear * downgearratio));
+                }
 
-            if (gear == 0f)
-            {
-                rpm -= (torque / downgearratio);
-            }
+                if (gear == 0f)
+                {
+                    rpm -= (torque / downgearratio);
+                }
 
+            }
         }
+
 
         //set up max rpm and min rpm;
         if (rpm >= maxrpm)
@@ -183,37 +201,86 @@ public class CarController : MonoBehaviour
             rpm = minrpm; 
         }
 
+
         //setting up acceleration
-        //positive acceleration when gear > 0 and rpm > 1000
-        if (gear > 0f && rpm > 1000f)
-        {
-            acceleration = hspr / rpm;
-        }
-        //no acc when gear = 0
-        else if (gear == 0f)
-        {
-            acceleration = 0f;
-        }
-        //negative acc when gear = -1 and rpm> 0
-        else if (gear == -1f && rpm > 1000f)
-        {
-            acceleration = -(hspr / rpm);
-        }
-        
-        //X movement using speed
+        //positive acceleration when gear > 0 and rpm > 1000, when w is down;
+        //no acc when gear = 0;
 
-       /* Vector3 position = this.transform.position;
-        position.x += acceleration;
-        this.transform.position = position;*/
+         if (Input.GetKey(KeyCode.W))
+         {
+             if (gear != 0f)
+             {
+                 acceleration = hspr / rpm;
+             }
+             else if (gear == 0f)
+             {
+                 acceleration = 0f;
+             }
+         }
 
-       
+         else if (Input.GetKey(KeyCode.W) == false)
+         {
+             acceleration = 0f;
+         }
 
-       // print(((bool)clutchin));
+      
+
+        //setting up speed
+        //inspeed += acceleration;
+        inspeed += ((acceleration * (rpm / 100)));
+        // inspeed += acceleration;
+        // inspeed += drag;
+        speed = inspeed;
+        speed += drag;
+
+
+
+        //setting up limits for speed and inspeed;
+        if (speed >= 2f)
+        {
+            speed = 2f;
+        }
+        if (speed <= 0f)
+        {
+            speed = 0f;
+        }
+        if (inspeed >= 5f)
+        {
+            inspeed = 5f;
+        }
+
+        //setting up movement
+        if (engine == true)
+        {
+            //car.AddForce(transform.forward * acceleration);
+            Vector3 position = this.transform.position;
+            position.x += speed;
+            this.transform.position = position;
+        }
+
+        //setting up brake and slow down
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            drag = -2f;
+        }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            drag = -0.2f;
+        }
+
+
+
+
+        // print(((bool)clutchin));
+        print((bool)engine);
         print(((float)gear));
-       // print(((int)lastgear));
-       // print(((int)rpmdrop));
-        print(((float)rpm));
+        // print(((int)lastgear));
+        // print(((int)rpmdrop));
+        print((float)rpm);
+        print(((float)inspeed));
         print(((float)acceleration));
+        print((float)speed);
+        //print((float)drag);
        // print(((int)speed));
        
 
