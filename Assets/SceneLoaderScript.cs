@@ -17,8 +17,8 @@ public class SceneLoaderScript : MonoBehaviour
         
     }
 
-    public void LoadMainScene(string Scenetoload)
+    public void LoadMainScene(string MainScene)
     {
-        SceneManager.LoadScene(Scenetoload);
+        SceneManager.LoadScene(MainScene);
     }
 }
