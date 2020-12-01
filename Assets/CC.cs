@@ -4,31 +4,37 @@ using UnityEngine;
 
 public class CC : MonoBehaviour
 {
-    bool clutchin;
-    bool ignition;
-    bool engine;
-    bool throttle;
-    bool brake;
-    bool upshift;
-    bool downshift;
+    public bool clutchin;
+    public bool ignition;
+    public bool engine;
+    public bool throttle;
 
-    float gear = 0f;
-    float lastgear = 0f;
-    float gearratio = 30f;
-    float downgearratio = 15f;
+    public float gear = 0f;
+    public float lastgear = 0f;
+    public float gearratio = 30f;
+    public float downgearratio = 15f;
 
-    float rpm = 0f;
-    float maxrpm = 8500f;
-    float minrpm = 0f;
-    float rpmdrop = 1500f;
-    float torque = 450f;
+    public float rpm = 0f;
+    public float maxrpm = 8500f;
+    public float minrpm = 0f;
+    public float rpmdrop = 1500f;
+    public float torque = 450f;
 
-    float inspeed = 0f;
-    float inspeed2 = 0f;
-    float speed = 0f;
-    float acceleration = 0f;
-    float drag = -0.2f;
-    float hspr = 2000f;
+    public float acceleration = 0f;
+    public float acc2 = 0f;
+    public float maxspeed = 150f;
+    public float minspeed = 0f;
+    public float hspr = 2000f;
+    public Rigidbody rb;
+    public float mindrag = 0.02f;
+    public float maxdrag = 0.5f;
+
+    public AudioClip m_engineOn;
+    public AudioClip m_engineOff;
+    public AudioClip m_exhaust;
+
+    public float exhuastpitch;
+    public float exhuastvolume;
 
     // Start is called before the first frame update
     void Start()
@@ -53,6 +59,8 @@ public class CC : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             ignition = true;
+            //play engine startup sound
+            PlayEngineOnSound();
         }
         if (Input.GetKeyUp(KeyCode.R))
         {
@@ -64,7 +72,7 @@ public class CC : MonoBehaviour
             engine = true;
         }
         //engine stall
-        else if (gear != 0 && rpm == 0 && !clutchin)
+        else if (gear != 0f && rpm == 0f && !clutchin)
         {
             engine = false;
         }
@@ -77,41 +85,211 @@ public class CC : MonoBehaviour
         {
             throttle = false;
         }
-        //brake
-        if (Input.GetKey(KeyCode.Space))
+
+
+
+
+        //setting up for exhuast
+        //volume and pitch
+        if (engine)
         {
-            brake = true;
+            exhuastvolume = 1f;
         }
-        if (Input.GetKey(KeyCode.Space) == false)
+        else if (!engine)
         {
-            brake = false;
+            exhuastvolume = 0f;
         }
-        //upshift
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        exhuastpitch = ((rpm / 5000f) + 0.3f);
+        //play exhuast sound
+        PlayExhaustSound();
+        
+
+        //gearing system
+        //synch last gear and gear so no rpm drop at 6 and no rise at 0
+        if (gear == lastgear)
         {
-            upshift = true;
+            rpmdrop = 0f;
         }
-        if (Input.GetKeyUp(KeyCode.UpArrow))
+        else if (gear != lastgear)
         {
-            upshift = false;
+            rpmdrop = 1500f;
         }
-        //downshift
-        if (Input.GetKeyDown(KeyCode.DownArrow))
+        //setting highest and lowest gear
+        if (gear <= 0f)
         {
-            downshift = true;
+            gear = 0f;
         }
-        if (Input.GetKeyUp(KeyCode.DownArrow))
+        else if (gear >= 6f)
         {
-            downshift = false;
+            gear = 6f;
+        }
+        //gear switch system
+        if (clutchin)
+        {
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                //so sync system would work
+                lastgear = gear - 2f;
+                if (lastgear <= 0f)
+                {
+                    lastgear = 0f;
+                }
+                gear -= 1f;
+                //downshift rpm rise
+                if (gear != 0f)
+                {
+                    if (rpm != 0f)
+                    {
+                        rpm += rpmdrop;
+                    }
+                }
+                //setting lowest gear, which is 0
+            }
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                //so sync works
+                lastgear = gear + 2f;
+                if (lastgear >= 6f){
+                    lastgear = 6f;
+                }
+                gear += 1f;
+                //upshift rpm drop
+                if (gear != 0f)
+                {
+                    if (rpm != 0f)
+                    {
+                        rpm -= rpmdrop;
+                    }
+                }
+               
+            }
         }
 
 
-        print((bool)clutchin);
-        print((bool)ignition);
-        print((bool)engine);
-        print((bool)throttle);
-        print((bool)brake);
-        print((bool)upshift); 
-        print((bool)downshift);
+
+
+        //throttle to increase rpm
+        //release throttle to drop rpm
+        if (engine)
+        {
+            if (throttle)
+            {
+                if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
+                {
+                    rpm += (torque / (gear * gearratio));
+                }
+                if (gear == 0f)
+                {
+                    rpm += (torque / gearratio);
+                }
+            }
+            if (!throttle)
+            {
+                if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
+                {
+                    rpm -= (torque / (gear * gearratio));
+                }
+                if (gear == 0f)
+                {
+                    rpm -= (torque / downgearratio);
+                }
+            }
+        }
+        //max and min rpm
+        if (rpm >= maxrpm)
+        {
+            rpm = maxrpm;
+        }
+        if (rpm <= minrpm)
+        {
+            rpm = minrpm;
+        }
+
+
+
+
+        //setting up acceleration
+        //acc only exist when throttle && gear != 0 && rpm > 1000
+        //no acc at gear 0
+        if (throttle)
+        {
+            if (gear != 0f)
+            {
+                acceleration = hspr / rpm;
+            }
+            else if (gear == 0f)
+            {
+                acceleration = 0f;
+            }
+        }
+        else if (!throttle)
+        {
+            acceleration = 0f;
+        }
+        //translate acceleration to acc2
+        acc2 = (acceleration * (rpm / 350));
+
+
+
+
+        //addforce for movement
+        rb.AddForce(acc2,0,0,ForceMode.Acceleration);
+        //maxspeed for each gear
+        maxspeed = gear * 30;
+        //limit speed of rigibody
+        if (rb.velocity.magnitude >= maxspeed)
+        {
+            rb.velocity = rb.velocity.normalized * maxspeed;
+        }
+        //if engine gets killed car stops- engine brake
+        if (gear != 0 && rpm == 0 && !engine)
+        {
+            rb.velocity = rb.velocity.normalized * minspeed;
+        }
+        //when throttle min drag
+        if (throttle)
+        {
+            rb.drag = mindrag;
+        }
+        //when !throttle max drag
+        if (!throttle)
+        {
+            rb.drag = maxdrag;
+        }
+       
+
+
+        //print((bool)clutchin);
+        //print((bool)ignition);
+        //print((bool)engine);
+        //print((bool)throttle);
+        //print((bool)brake);
+        //print((bool)upshift); 
+        //print((bool)downshift);
+        print((float)gear);
+        print((float)rpm);
+    }
+
+    private void PlayEngineOnSound()
+    {
+        AudioSource audio = GetComponent<AudioSource>();
+        //audio.Play();
+        audio.clip = m_engineOn;
+        audio.loop = false;
+        audio.Play();
+    }
+
+    private void PlayExhaustSound()
+    {
+        AudioSource audio = GetComponent<AudioSource>();
+        audio.volume = exhuastvolume;
+        audio.pitch = exhuastpitch;
+        //audio.Play();
+        audio.clip = m_exhaust;
+        audio.loop = true;
+        if (!audio.isPlaying)
+        {
+            audio.Play();
+        }
     }
 }
