@@ -40,6 +40,8 @@ public class CC : MonoBehaviour
     public float exhuastpitch;
     public float exhuastvolume;
 
+    public SpawnManager spawnManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -114,7 +116,7 @@ public class CC : MonoBehaviour
         //volume and pitch
         if (engine)
         {
-            exhuastvolume = 1f;
+            exhuastvolume = 0.5f;
         }
         else if (!engine)
         {
@@ -208,7 +210,7 @@ public class CC : MonoBehaviour
             {
                 if (gear == 1f || gear == 2f || gear == 3f || gear == 4f || gear == 5f || gear == 6f)
                 {
-                    rpm -= (torque / (gear * gearratio));
+                    rpm -= (torque / gearratio);
                 }
                 if (gear == 0f)
                 {
@@ -362,4 +364,10 @@ public class CC : MonoBehaviour
             audio.Play();
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        spawnManager.SpawnTriggerEntered();
+    }
+
 }
