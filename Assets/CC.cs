@@ -8,6 +8,10 @@ public class CC : MonoBehaviour
     public bool ignition;
     public bool engine;
     public bool throttle;
+    public bool left;
+    public bool right;
+    public bool atleft;
+    public bool atright;
 
     public float gear = 0f;
     public float lastgear = 0f;
@@ -60,7 +64,7 @@ public class CC : MonoBehaviour
         {
             ignition = true;
             //play engine startup sound
-            PlayEngineOnSound();
+            //PlayEngineOnSound();
         }
         if (Input.GetKeyUp(KeyCode.R))
         {
@@ -85,7 +89,24 @@ public class CC : MonoBehaviour
         {
             throttle = false;
         }
-
+        //left
+        if (Input.GetKey(KeyCode.A))
+        {
+            left = true;
+        }
+        if (Input.GetKey(KeyCode.A) == false)
+        {
+            left = false;
+        }
+        //right
+        if (Input.GetKey(KeyCode.D))
+        {
+            right = true;
+        }
+        if (Input.GetKey(KeyCode.D) == false)
+        {
+            right = false;
+        }
 
 
 
@@ -256,7 +277,52 @@ public class CC : MonoBehaviour
         {
             rb.drag = maxdrag;
         }
-       
+
+
+
+        //setting up left and right barriers
+        if (this.transform.position.z >= -29)
+        {
+            atleft = true;
+        }
+        else if (this.transform.position.z < -29)
+        {
+            atleft = false;
+        }
+        if (this.transform.position.z <= -43)
+        {
+            atright = true;
+        }
+        else if (this.transform.position.z > -43)
+        {
+            atright = false;
+        }
+        //left movement and right movement
+        if (rb.velocity.magnitude != 0 && left && !atleft)
+        {
+            Vector3 position = this.transform.position;
+            position.z += 0.05f;
+            this.transform.position = position;
+        }
+        else if (atleft)
+        {
+            Vector3 position = this.transform.position;
+            position.z += 0f;
+            this.transform.position = position;
+        }
+        if (rb.velocity.magnitude != 0 && right && !atright)
+        {
+            Vector3 position = this.transform.position;
+            position.z -= 0.05f;
+            this.transform.position = position;
+        }
+        else if (atright)
+        {
+            Vector3 position = this.transform.position;
+            position.z -= 0f;
+            this.transform.position = position;
+        }
+
 
 
         //print((bool)clutchin);
@@ -270,14 +336,17 @@ public class CC : MonoBehaviour
         print((float)rpm);
     }
 
-    private void PlayEngineOnSound()
+    /*private void PlayEngineOnSound()
     {
         AudioSource audio = GetComponent<AudioSource>();
+        audio.volume = 2f;
+        audio.pitch = 1f;
         //audio.Play();
         audio.clip = m_engineOn;
+        audio.PlayOneShot(audio.clip);
         audio.loop = false;
         audio.Play();
-    }
+    }*/
 
     private void PlayExhaustSound()
     {
@@ -286,6 +355,7 @@ public class CC : MonoBehaviour
         audio.pitch = exhuastpitch;
         //audio.Play();
         audio.clip = m_exhaust;
+        //audio.PlayOneShot(audio.clip);
         audio.loop = true;
         if (!audio.isPlaying)
         {
