@@ -620,7 +620,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1021929448}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -46.04, y: 0.85, z: -37.5}
+  m_LocalPosition: {x: -46.04, y: 0.85, z: -36.1}
   m_LocalScale: {x: 4.78, y: 1.37, z: 1.91}
   m_Children:
   - {fileID: 963194228}
@@ -643,6 +643,8 @@ MonoBehaviour:
   ignition: 0
   engine: 0
   throttle: 0
+  left: 0
+  right: 0
   gear: 0
   lastgear: 0
   gearratio: 30
