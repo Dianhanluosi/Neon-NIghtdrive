@@ -31,7 +31,7 @@ public class CC : MonoBehaviour
     public float hspr = 2000f;
     public Rigidbody rb;
     public float mindrag = 0.02f;
-    public float maxdrag = 0.5f;
+    public float maxdrag = 0.05f;
 
     public AudioClip m_engineOn;
     public AudioClip m_engineOff;
@@ -45,7 +45,10 @@ public class CC : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
+        //limit fps 
+        Application.targetFrameRate = 60;
+
     }
 
     // Update is called once per frame
