@@ -259,16 +259,20 @@ public class CC : MonoBehaviour
 
 
         //addforce for movement
-        rb.AddForce(acc2,0,0,ForceMode.Acceleration);
+        rb.AddForce(acc2, 0, 0, ForceMode.Acceleration);
         //maxspeed for each gear
         maxspeed = gear * 30;
+        if (gear == 0)
+        {
+            maxspeed = 180f;
+        }
         //limit speed of rigibody
         if (rb.velocity.magnitude >= maxspeed)
         {
             rb.velocity = rb.velocity.normalized * maxspeed;
         }
         //if engine gets killed car stops- engine brake
-        if (gear != 0 && rpm == 0 && !engine)
+        if (!engine)
         {
             rb.velocity = rb.velocity.normalized * minspeed;
         }
