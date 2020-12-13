@@ -12,6 +12,7 @@ public class CC : MonoBehaviour
     public bool right;
     public bool atleft;
     public bool atright;
+    public bool started = false;
 
     public float gear = 0f;
     public float lastgear = 0f;
@@ -32,6 +33,7 @@ public class CC : MonoBehaviour
     public Rigidbody rb;
     public float mindrag = 0.02f;
     public float maxdrag = 0.05f;
+    public float tire;
 
     public AudioClip m_engineOn;
     public AudioClip m_engineOff;
@@ -84,6 +86,7 @@ public class CC : MonoBehaviour
         else if (gear != 0f && rpm == 0f && !clutchin)
         {
             engine = false;
+            started = false;
         }
         //throttle
         if (Input.GetKey(KeyCode.W))
@@ -119,13 +122,13 @@ public class CC : MonoBehaviour
         //volume and pitch
         if (engine)
         {
-            exhuastvolume = 0.5f;
+            exhuastvolume = 0.3f;
         }
         else if (!engine)
         {
             exhuastvolume = 0f;
         }
-        exhuastpitch = ((rpm / 5000f) + 0.3f);
+        exhuastpitch = ((rpm / 7000f) + 0.3f);
         //play exhuast sound
         PlayExhaustSound();
         
@@ -262,15 +265,22 @@ public class CC : MonoBehaviour
         rb.AddForce(acc2, 0, 0, ForceMode.Acceleration);
         //maxspeed for each gear
         maxspeed = gear * 30;
+        minspeed = 0;
         if (gear == 0)
         {
             maxspeed = 180f;
+           // minspeed = 0f;
         }
         //limit speed of rigibody
         if (rb.velocity.magnitude >= maxspeed)
         {
             rb.velocity = rb.velocity.normalized * maxspeed;
         }
+        if (rb.velocity.magnitude <= minspeed)
+        {
+            rb.velocity = rb.velocity.normalized * minspeed;
+        }
+        tire = rb.velocity.magnitude;
         //if engine gets killed car stops- engine brake
         if (!engine)
         {
@@ -290,19 +300,19 @@ public class CC : MonoBehaviour
 
 
         //setting up left and right barriers
-        if (this.transform.position.z >= -29)
+        if (this.transform.position.z >= -6.132)
         {
             atleft = true;
         }
-        else if (this.transform.position.z < -29)
+        else if (this.transform.position.z < -6.132)
         {
             atleft = false;
         }
-        if (this.transform.position.z <= -43)
+        if (this.transform.position.z <= -22.598)
         {
             atright = true;
         }
-        else if (this.transform.position.z > -43)
+        else if (this.transform.position.z > -22.598)
         {
             atright = false;
         }
