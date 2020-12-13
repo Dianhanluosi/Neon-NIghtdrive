@@ -300,19 +300,19 @@ public class CC : MonoBehaviour
 
 
         //setting up left and right barriers
-        if (this.transform.position.z >= -6.132)
+        if (this.transform.position.z >= -6.26)
         {
             atleft = true;
         }
-        else if (this.transform.position.z < -6.132)
+        else if (this.transform.position.z < -6.26)
         {
             atleft = false;
         }
-        if (this.transform.position.z <= -22.598)
+        if (this.transform.position.z <= -22.478)
         {
             atright = true;
         }
-        else if (this.transform.position.z > -22.598)
+        else if (this.transform.position.z > -22.478)
         {
             atright = false;
         }
