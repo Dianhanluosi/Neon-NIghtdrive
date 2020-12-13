@@ -12,6 +12,11 @@ public class randomSound : MonoBehaviour
 
    public int num = 0;
 
+    public float timer = 5f;
+    public float audtime;
+
+    public bool playing;
+
 
     // Start is called before the first frame update
     void Start()
@@ -21,18 +26,25 @@ public class randomSound : MonoBehaviour
 
     }
 
-    float timer = 5f;
-
+    
     void Update()
     {
 
        timer -= Time.deltaTime;
         if (timer < 0) {
             playSound();
-            timer = (audio.time + 5f);
+            timer = (audtime + 5f);
 
         }
        
+        if (!audio.isPlaying)
+        {
+            playing = false;
+        }
+        else if (audio.isPlaying)
+        {
+            playing = true;
+        }
         
     }
 
@@ -57,8 +69,14 @@ public class randomSound : MonoBehaviour
         {
             audio.clip = audioClipArray[num];
             audio.Play();
+            timing();
             numplus();
         }
+    }
+
+    void timing()
+    {
+        audtime = audio.clip.length;
     }
 
     private void numplus()
