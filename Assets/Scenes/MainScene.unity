@@ -2661,6 +2661,8 @@ MonoBehaviour:
   recordArray:
   - {fileID: 8300000, guid: c42d0efa6f2d04c47a65ea9e9f06a3f0, type: 3}
   - {fileID: 8300000, guid: 01287aa2248bb814ba09dc82fb6f5eda, type: 3}
+  timer: 45
+  audtime: 0
   num: 0
 --- !u!4 &2111544927
 Transform:
