@@ -10,6 +10,8 @@ public class randomRecording : MonoBehaviour
 
     //public bool done;
 
+    public float timer = 45f;
+    public float audtime;
 
     public int num = 0;
 
@@ -18,11 +20,10 @@ public class randomRecording : MonoBehaviour
     void Start()
     {
         record = GetComponent<AudioSource>();
-        Shuffle();
+        //Shuffle();
 
     }
 
-    float timer = 5f;
 
     void Update()
     {
@@ -31,7 +32,7 @@ public class randomRecording : MonoBehaviour
         if (timer < 0)
         {
             playSound();
-            timer = (record.time + 5f);
+            timer = (audtime + 30f);
 
         }
 
@@ -59,9 +60,16 @@ public class randomRecording : MonoBehaviour
         {
             record.clip = recordArray[num];
             record.Play();
+            timing();
             numplus();
         }
     }
+
+    void timing()
+    {
+        audtime = record.clip.length;
+    }
+
 
     private void numplus()
     {
