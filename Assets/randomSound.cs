@@ -9,6 +9,8 @@ public class randomSound : MonoBehaviour
 
     public AudioClip[] audioClipArray;
 
+    public AudioSource recording;
+
 
    public int num = 0;
 
@@ -21,7 +23,7 @@ public class randomSound : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        audio = GetComponent<AudioSource>();
+        //audio = GetComponent<AudioSource>();
         Shuffle();
 
     }
@@ -29,6 +31,15 @@ public class randomSound : MonoBehaviour
     
     void Update()
     {
+
+        if (!recording.isPlaying)
+        {
+            audio.volume = 0.4f;
+        }
+        else if (recording.isPlaying)
+        {
+            audio.volume = 0.1f;
+        }
 
        timer -= Time.deltaTime;
         if (timer < 0) {
