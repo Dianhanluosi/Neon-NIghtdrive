@@ -44,6 +44,8 @@ public class CC : MonoBehaviour
 
     public SpawnManager spawnManager;
 
+    public AudioSource recording;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,6 +58,9 @@ public class CC : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
+
         //setting up bools;
         //clutch
         if (Input.GetKeyDown(KeyCode.Q))
@@ -120,9 +125,13 @@ public class CC : MonoBehaviour
 
         //setting up for exhuast
         //volume and pitch
-        if (engine)
+        if (engine && !recording.isPlaying)
         {
             exhuastvolume = 0.3f;
+        }
+        else if (engine && recording.isPlaying)
+        {
+            exhuastvolume = 0.1f;
         }
         else if (!engine)
         {
